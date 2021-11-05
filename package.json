@@ -1,0 +1,30 @@
+{
+  "name": "btc-tx-size-fee-estimator",
+  "version": "1.0.0",
+  "description": "Bitcoin Transaction Size / Fee Calculator",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "prepare": "mkdir -p dist && uglifyjs -o dist/index.js --mangle --compress -- index.js",
+    "prepare-and-test": "npm run prepare && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/argvil19/bitcoin-transaction-size-calculator.git"
+  },
+  "author": "Argenis Villasmil (argvil19@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/argvil19/bitcoin-transaction-size-calculator/issues"
+  },
+  "homepage": "https://github.com/argvil19/bitcoin-transaction-size-calculator#readme",
+  "devDependencies": {
+    "eslint": "^8.1.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.1",
+    "jest": "^27.3.1",
+    "uglify-js": "^3.14.3"
+  }
+}
