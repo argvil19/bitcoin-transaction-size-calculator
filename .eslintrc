@@ -1,0 +1,11 @@
+{
+  "extends": "standard",
+  "rules": {
+    "no-var": "off",
+    "semi": "error",
+    "camelcase": "off",
+    "operator-linebreak": "off",
+    "space-before-function-paren": "off",
+    "no-loss-of-precision": "off"
+  }
+}
