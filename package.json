@@ -2,7 +2,7 @@
   "name": "btc-tx-size-fee-estimator",
   "version": "1.0.0",
   "description": "Bitcoin Transaction Size / Fee Calculator",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest",
     "prepare": "mkdir -p dist && uglifyjs -o dist/index.js --mangle --compress -- index.js",
