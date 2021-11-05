@@ -91,6 +91,7 @@ class BtcSizeFeeEstimator {
 
   prepareParams(opts) {
     // Verify opts and set them to this.params
+    opts = opts || Object.assign(this.defaultParams)
 
     var input_count = parseInt(opts.input_count || this.defaultParams.input_count)
     if (!Number.isInteger(input_count) || input_count < 0) {
@@ -244,16 +245,23 @@ class BtcSizeFeeEstimator {
     return { txVBytes, txBytes, txWeight }
   }
 
-  estimatedFee(vbyte, satVb) {
+  estimateFee(vbyte, satVb) {
+    if (isNaN(vbyte) || isNaN(satVb)) {
+      throw new Error('Parameters should be numbers')
+    }
     return parseInt(vbyte) * parseInt(satVb)
   }
 
   formatFeeRange(fee, multiplier) {
+    if (isNaN(fee) || isNaN(multiplier)) {
+      throw new Error('Parameters should be numbers')
+    }
+
     fee = parseInt(fee)
     multiplier = Number(multiplier)
 
-    if (multiplier > 1) {
-      multiplier = multiplier / 100
+    if (multiplier < 0) {
+      throw new Error('Multiplier cant be negative')
     }
 
     var multipliedFee = fee * multiplier
