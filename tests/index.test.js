@@ -124,6 +124,17 @@ describe('BtcSizeFeeEstimator', () => {
   })
 
   describe('prepareParams', () => {
+    it('should use default params if not set', () => {
+      btcEstimator.prepareParams()
+      expect(btcEstimator.params).toEqual(
+        expect.objectContaining(btcEstimator.defaultParams)
+      )
+
+      btcEstimator.prepareParams({ input_script: 'P2SH' })
+      expect(btcEstimator.params.input_script).toEqual('P2SH')
+      expect(btcEstimator.params.p2sh_output_count).toEqual(0)
+    })
+
     it('should set params correctly', () => {
       opts = {
         input_count: 1,
@@ -200,8 +211,122 @@ describe('BtcSizeFeeEstimator', () => {
         p2wsh_output_count: 1,
         p2tr_output_count: 1
       }
-
+      btcEstimator.prepareParams(opts)
       expect(btcEstimator.getOutputCount()).toBe(7)
+    })
+  })
+
+  describe('getSizeBasedOnInputType', () => {
+    it('should return inputSize = P2PKH_IN_SIZE | inputWitnessSize = 0 if input type is P2PKH', () => {
+      btcEstimator.prepareParams()
+      expect(btcEstimator.getSizeBasedOnInputType()).toEqual(
+        expect.objectContaining({
+          inputSize: btcEstimator.P2PKH_IN_SIZE,
+          inputWitnessSize: 0
+        })
+      )
+    })
+
+    it('should return inputSize = P2SH_P2WPKH_IN_SIZE | inputWitnessSize = 107 if input type is P2SH-P2WPKH', () => {
+      btcEstimator.prepareParams({ input_script: 'P2SH-P2WPKH' })
+      expect(btcEstimator.getSizeBasedOnInputType()).toEqual(
+        expect.objectContaining({
+          inputSize: btcEstimator.P2SH_P2WPKH_IN_SIZE,
+          inputWitnessSize: 107
+        })
+      )
+    })
+
+    it('should return inputSize = P2WPKH_IN_SIZE | inputWitnessSize = 107 if input type is P2WPKH', () => {
+      btcEstimator.prepareParams({ input_script: 'P2WPKH' })
+      expect(btcEstimator.getSizeBasedOnInputType()).toEqual(
+        expect.objectContaining({
+          inputSize: btcEstimator.P2WPKH_IN_SIZE,
+          inputWitnessSize: 107
+        })
+      )
+    })
+
+    it('should return inputSize = P2TR_IN_SIZE | inputWitnessSize = 65 if input type is P2TR', () => {
+      btcEstimator.prepareParams({ input_script: 'P2TR' })
+      expect(btcEstimator.getSizeBasedOnInputType()).toEqual(
+        expect.objectContaining({
+          inputSize: btcEstimator.P2TR_IN_SIZE,
+          inputWitnessSize: 65
+        })
+      )
+    })
+
+    it('should return inputSize = 46 | inputWitnessSize = 0 if input type is P2SH, default params', () => {
+      btcEstimator.prepareParams({ input_script: 'P2SH' })
+      expect(btcEstimator.getSizeBasedOnInputType()).toEqual(
+        expect.objectContaining({
+          inputSize: 46,
+          inputWitnessSize: 0
+        })
+      )
+    })
+
+    it('should return inputSize = 41.25 | inputWitnessSize = 5 if input type is P2WSH, default params', () => {
+      btcEstimator.prepareParams({ input_script: 'P2WSH' })
+      expect(btcEstimator.getSizeBasedOnInputType()).toEqual(
+        expect.objectContaining({
+          inputSize: 41.25,
+          inputWitnessSize: 5
+        })
+      )
+    })
+
+    it('should return inputSize = 41.25 | inputWitnessSize = 5 if input type is P2SH-P2WSH, default params', () => {
+      btcEstimator.prepareParams({ input_script: 'P2SH-P2WSH' })
+      expect(btcEstimator.getSizeBasedOnInputType()).toEqual(
+        expect.objectContaining({
+          inputSize: 76.25,
+          inputWitnessSize: 5
+        })
+      )
+    })
+  })
+
+  describe('calcTxSize', () => {
+    it('it should calculate weight given no params (use default)', () => {
+      expect(btcEstimator.calcTxSize()).toEqual(
+        expect.objectContaining({
+          txBytes: 10,
+          txVBytes: 10,
+          txWeight: 40
+        })
+      )
+    })
+
+    it('should calculate weight based on params', () => {
+      // random params
+      opts.p2pkh_output_count = 10
+      opts.p2tr_output_count = 2
+      expect(btcEstimator.calcTxSize(opts)).toEqual(
+        expect.objectContaining({
+          txBytes: 436,
+          txVBytes: 436,
+          txWeight: 1744
+        })
+      )
+    })
+  })
+
+  describe('estimatedFee', () => {
+    it('should multiply params in order to calculate final fee', () => {
+      expect(btcEstimator.estimateFee(100, 5)).toEqual(500)
+    })
+
+    it('should throw an error is NaN is passed', () => {
+      expect(() => btcEstimator.estimateFee('a', 10)).toThrow()
+      expect(() => btcEstimator.estimateFee(100, 'b')).toThrow()
+    })
+  })
+
+  describe('formatFeeRange', () => {
+    it('should format fee', () => {
+      expect(btcEstimator.formatFeeRange(1000, 0.05)).toEqual('950 - 1050')
     })
   })
 })
